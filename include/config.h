@@ -8,7 +8,7 @@
 // --- Hardware Pin Assignments ---
 #define PIN_I2C_SDA               21
 #define PIN_I2C_SCL               22
-#define PIN_LIS3DH_INT            4
+#define PIN_LIS3DH_INT            18
 
 // --- FreeRTOS & System Timing (in Milliseconds) ---
 #define INTERVAL_NOMINAL_MS       60000UL   // 60-second nominal sampling[cite: 2]

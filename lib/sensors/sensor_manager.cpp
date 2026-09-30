@@ -41,7 +41,7 @@ void SensorManager::configureShockInterrupt(float threshold_g) {
 
     uint8_t threshold_reg = (uint8_t)((threshold_g * 1000.0f) / 186.0f);
     
-    writeReg8(LIS3DH_REG_INT1CFG, 0x2A); 
+    writeReg8(LIS3DH_REG_INT1CFG, 0x3F); 
     writeReg8(LIS3DH_REG_INT1THS, threshold_reg & 0x7F); 
     writeReg8(LIS3DH_REG_INT1DUR, 0x02); 
     writeReg8(LIS3DH_REG_CTRL3, 0x40); 
