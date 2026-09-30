@@ -1,0 +1,59 @@
+# ==========================================
+# Firmware / PlatformIO (C++)
+# ==========================================
+.pio/
+.vscode/
+*.bin
+*.elf
+*.hex
+*.map
+*.o
+*.a
+
+# Security & Credentials
+include/secrets.h
+server/.env
+
+# ==========================================
+# Backend / Server (Python / Node.js)
+# ==========================================
+server/node_modules/
+server/npm-debug.log*
+server/yarn-error.log*
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+.pytest_cache/
+
+# ==========================================
+# Database (SQLite in WAL Mode)
+# ==========================================
+*.db
+*.sqlite
+*.sqlite3
+*-wal
+*-shm
+
+# ==========================================
+# ML Training
+# ==========================================
+.ipynb_checkpoints/
+ml_training/**/*.h5
+ml_training/**/*.tflite
+# Note: baseline_normal.csv is tracked, but ignore large generated datasets:
+ml_training/dataset/temp_*.csv
+
+# ==========================================
+# OS & IDE specifics
+# ==========================================
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+ehthumbs.db
+$RECYCLE.BIN/
+.idea/
+*.swp

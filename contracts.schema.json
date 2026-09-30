@@ -1,0 +1,271 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://coldchain.internal/schemas/contracts.schema.json",
+  "title": "ColdChainSystemUnifiedContract",
+  "description": "Cross-stack authoritative data contracts for ESP32 Firmware, Edge ML, Backend, and SQLite Storage layers.",
+  
+  "oneOf": [
+    { "$ref": "#/$defs/telemetry_payload" },
+    { "$ref": "#/$defs/batch_sync_payload" }
+  ],
+
+  "$defs": {
+    "system_operating_state": {
+      "type": "string",
+      "enum": ["STATE_STABLE_CRUISE", "STATE_NORMAL_TRANSIT", "STATE_ACTIVE_EXCURSION", "STATE_DOOR_BREACH"],
+      "description": "Firmware state machine status on Core 1."
+    },
+
+    "telemetry_metrics": {
+      "type": "object",
+      "required": ["temperature", "humidity", "dew_point", "vibration_rms", "temp_gradient", "mkt"],
+      "properties": {
+        "temperature": {
+          "type": "number",
+          "minimum": -40.0,
+          "maximum": 85.0,
+          "description": "Direct SHT40 temperature reading in degrees Celsius."
+        },
+        "humidity": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 100.0,
+          "description": "Relative humidity percentage from SHT40."
+        },
+        "dew_point": {
+          "type": "number",
+          "description": "Onboard calculated dew point in degrees Celsius (Magnus formula)."
+        },
+        "vibration_rms": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 16.0,
+          "description": "LIS3DH dynamic acceleration RMS magnitude in Gs."
+        },
+        "temp_gradient": {
+          "type": "number",
+          "description": "Rate of temperature change in °C/min (dT/dt)."
+        },
+        "mkt": {
+          "type": "number",
+          "description": "Cumulative Mean Kinetic Temperature in degrees Celsius (Haynes Equation)."
+        }
+      },
+      "additionalProperties": false
+    },
+
+    "diagnostics": {
+      "type": "object",
+      "required": ["battery_pct", "battery_voltage", "operating_state"],
+      "properties": {
+        "battery_pct": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Fuel gauge percentage."
+        },
+        "battery_voltage": {
+          "type": "number",
+          "minimum": 2.5,
+          "maximum": 4.5,
+          "description": "Li-ion cell terminal voltage."
+        },
+        "operating_state": {
+          "$ref": "#/$defs/system_operating_state"
+        }
+      },
+      "additionalProperties": false
+    },
+
+    "ml_inference": {
+      "type": "object",
+      "required": ["reconstruction_mse", "anomaly_flag"],
+      "properties": {
+        "reconstruction_mse": {
+          "type": "number",
+          "minimum": 0.0,
+          "description": "Reconstruction Mean Squared Error calculated by the TFLM Autoencoder."
+        },
+        "anomaly_flag": {
+          "type": "boolean",
+          "description": "True if reconstruction_mse exceeds threshold (0.045)."
+        }
+      },
+      "additionalProperties": false
+    },
+
+    "alerts": {
+      "type": "object",
+      "required": ["is_urgent", "temp_breach", "shock_detected"],
+      "properties": {
+        "is_urgent": {
+          "type": "boolean",
+          "description": "Signals immediate transmission or alert broadcast."
+        },
+        "temp_breach": {
+          "type": "boolean",
+          "description": "True if temp outside 2°C–8°C or fast gradient ramp detected."
+        },
+        "shock_detected": {
+          "type": "boolean",
+          "description": "True if dynamic acceleration exceeded hardware threshold (>2.5G)."
+        }
+      },
+      "additionalProperties": false
+    },
+
+    "telemetry_payload": {
+      "type": "object",
+      "description": "HTTP POST body schema sent by ESP32 Core 0 to '/api/v1/telemetry'.",
+      "required": ["node_id", "trip_id", "timestamp", "metrics", "diagnostics", "ml_inference", "alerts"],
+      "properties": {
+        "node_id": {
+          "type": "string",
+          "pattern": "^[A-Z0-9_-]{4,32}$",
+          "description": "Hardware device identifier."
+        },
+        "trip_id": {
+          "type": "string",
+          "pattern": "^[A-Z0-9_-]{4,32}$",
+          "description": "Consignment or trip session UUID/ID."
+        },
+        "timestamp": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Epoch timestamp in seconds or millisecond tick from boot."
+        },
+        "metrics": { "$ref": "#/$defs/telemetry_metrics" },
+        "diagnostics": { "$ref": "#/$defs/diagnostics" },
+        "ml_inference": { "$ref": "#/$defs/ml_inference" },
+        "alerts": { "$ref": "#/$defs/alerts" }
+      },
+      "additionalProperties": false
+    },
+
+    "batch_record": {
+      "type": "object",
+      "required": ["timestamp", "temperature", "humidity", "vibration_rms", "mkt", "alerts"],
+      "properties": {
+        "timestamp": { "type": "integer" },
+        "temperature": { "type": "number" },
+        "humidity": { "type": "number" },
+        "vibration_rms": { "type": "number" },
+        "mkt": { "type": "number" },
+        "alerts": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 255,
+          "description": "Packed bitmask of alert flags from LittleFS."
+        }
+      },
+      "additionalProperties": false
+    },
+
+    "batch_sync_payload": {
+      "type": "object",
+      "description": "Schema for uploading flushed offline LittleFS buffers to '/api/v1/telemetry/batch'.",
+      "required": ["node_id", "trip_id", "sync_timestamp", "record_count", "records"],
+      "properties": {
+        "node_id": { "type": "string" },
+        "trip_id": { "type": "string" },
+        "sync_timestamp": { "type": "integer" },
+        "record_count": { "type": "integer", "minimum": 1 },
+        "records": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/batch_record" }
+        }
+      },
+      "additionalProperties": false
+    },
+
+    "ml_feature_vector": {
+      "type": "array",
+      "description": "Strict 5-dimensional normalized float32 vector ingested by the TFLM Autoencoder on Core 1.",
+      "items": {
+        "type": "number",
+        "minimum": 0.0,
+        "maximum": 1.0
+      },
+      "minItems": 5,
+      "maxItems": 5,
+      "prefixItems": [
+        { "title": "norm_temperature", "description": "(Temp - (-5.0)) / 35.0" },
+        { "title": "norm_gradient", "description": "abs(dT/dt) / 2.0" },
+        { "title": "norm_humidity", "description": "RH / 100.0" },
+        { "title": "norm_vibration_rms", "description": "RMS_G / 4.0" },
+        { "title": "norm_dew_margin", "description": "(Temp - DewPoint) / 15.0" }
+      ]
+    },
+
+    "ble_binary_packet": {
+      "type": "object",
+      "description": "Binary memory layout of the 13-byte BLE Manufacturer Specific Data payload.",
+      "properties": {
+        "byte_length": { "const": 13 },
+        "fields": {
+          "type": "object",
+          "properties": {
+            "company_id": { "type": "string", "const": "0xFFFF", "description": "Offset 0..1 (uint16_t, Little-Endian)" },
+            "temp_x100": { "type": "string", "description": "Offset 2..3 (int16_t, Temp * 100)" },
+            "hum_x100": { "type": "string", "description": "Offset 4..5 (uint16_t, RH * 100)" },
+            "mkt_x100": { "type": "string", "description": "Offset 6..7 (int16_t, MKT * 100)" },
+            "vibe_rms_x1000": { "type": "string", "description": "Offset 8..9 (uint16_t, G * 1000)" },
+            "battery_pct": { "type": "string", "description": "Offset 10 (uint8_t, 0..100)" },
+            "alert_flags": { 
+              "type": "string", 
+              "description": "Offset 11 (uint8_t bitmask: Bit0=Temp, Bit1=Motion, Bit2=ML, Bit3=Battery)" 
+            },
+            "seq_counter": { "type": "string", "description": "Offset 12 (uint8_t rollover counter 0..255)" }
+          }
+        }
+      }
+    },
+
+    "sqlite_telemetry_record": {
+      "type": "object",
+      "description": "Flat tabular schema representing one row in the SQLite 'telemetry_records' table.",
+      "required": [
+        "node_id",
+        "trip_id",
+        "recorded_at",
+        "temperature",
+        "humidity",
+        "dew_point",
+        "vibration_rms",
+        "temp_gradient",
+        "mkt",
+        "battery_pct",
+        "battery_voltage",
+        "operating_state",
+        "ml_reconstruction_mse",
+        "ml_anomaly_flag",
+        "is_urgent",
+        "temp_breach",
+        "shock_detected"
+      ],
+      "properties": {
+        "record_id": { "type": "integer", "description": "INTEGER PRIMARY KEY AUTOINCREMENT" },
+        "node_id": { "type": "string", "description": "TEXT NOT NULL REFERENCES nodes(node_id)" },
+        "trip_id": { "type": "string", "description": "TEXT NOT NULL REFERENCES trips(trip_id)" },
+        "recorded_at": { "type": "string", "format": "date-time", "description": "TEXT (ISO-8601 UTC string)" },
+        "temperature": { "type": "number", "minimum": -40.0, "maximum": 85.0, "description": "REAL NOT NULL" },
+        "humidity": { "type": "number", "minimum": 0.0, "maximum": 100.0, "description": "REAL NOT NULL" },
+        "dew_point": { "type": "number", "description": "REAL NOT NULL" },
+        "vibration_rms": { "type": "number", "minimum": 0.0, "description": "REAL NOT NULL" },
+        "temp_gradient": { "type": "number", "description": "REAL NOT NULL" },
+        "mkt": { "type": "number", "description": "REAL NOT NULL" },
+        "battery_pct": { "type": "integer", "minimum": 0, "maximum": 100, "description": "INTEGER NOT NULL" },
+        "battery_voltage": { "type": "number", "minimum": 2.0, "maximum": 5.0, "description": "REAL NOT NULL" },
+        "operating_state": { "$ref": "#/$defs/system_operating_state" },
+        "ml_reconstruction_mse": { "type": "number", "minimum": 0.0, "description": "REAL NOT NULL" },
+        "ml_anomaly_flag": { "type": "integer", "enum": [0, 1], "description": "INTEGER NOT NULL CHECK(0,1)" },
+        "is_urgent": { "type": "integer", "enum": [0, 1], "description": "INTEGER DEFAULT 0" },
+        "temp_breach": { "type": "integer", "enum": [0, 1], "description": "INTEGER DEFAULT 0" },
+        "shock_detected": { "type": "integer", "enum": [0, 1], "description": "INTEGER DEFAULT 0" },
+        "ingested_at": { "type": "string", "format": "date-time", "description": "TEXT DEFAULT (datetime('now', 'utc'))" },
+        "is_batch_sync": { "type": "integer", "enum": [0, 1], "description": "INTEGER DEFAULT 0" }
+      },
+      "additionalProperties": false
+    }
+  }
+}
