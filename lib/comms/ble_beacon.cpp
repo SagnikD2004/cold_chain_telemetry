@@ -6,8 +6,16 @@ bool BLEBeacon::begin() {
     return true;
 }
 
+void BLEBeacon::start() {
+    Serial.println("[STUB-BLE] Advertising started (Mock)");
+}
+
+void BLEBeacon::stop() {
+    Serial.println("[STUB-BLE] Advertising stopped (Mock)");
+}
+
 void BLEBeacon::updateAdvertisement(const BLEPayload& payload) {
-    // Print the packed 13-byte hex frame to Serial to verify byte layout[cite: 1]
+    
     const uint8_t* raw = reinterpret_cast<const uint8_t*>(&payload);
     
     Serial.print("[STUB-BLE] 13-Byte Frame Broadcast: ");
