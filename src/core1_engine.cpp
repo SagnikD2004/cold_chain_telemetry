@@ -22,13 +22,13 @@ void core1_sensing_task(void *pvParameters) {
             sensorManager.clearInterrupt();
         }
 
-        float temp, hum, ax, ay, az;
-        if (!sensorManager.readSensors(temp, hum, ax, ay, az)) {
+        float temp, hum;
+        if (!sensorManager.readClimate(temp, hum)) {
             vTaskDelay(pdMS_TO_TICKS(1000));
             continue; 
         }
 
-        float rms = mathEngine.calculateVibrationRMS(ax, ay, az);
+        float rms = sensorManager.readVibrationBurstRMS(50);
         float dew = mathEngine.calculateDewPoint(temp, hum);
         float grad = mathEngine.updateGradient(temp, millis());
         float mkt = mathEngine.updateMKT(temp);
@@ -48,7 +48,7 @@ void core1_sensing_task(void *pvParameters) {
         mlEngine.evaluateConditions(temp, grad, hum, rms, dew, packet.ml_inference);
 
         packet.alerts.temp_breach = (temp < THRESHOLD_TEMP_MIN_C || temp > THRESHOLD_TEMP_MAX_C);
-        packet.alerts.shock_detected = shock_triggered || (rms > THRESHOLD_SHOCK_G);
+        packet.alerts.shock_detected = shock_triggered || (rms > THRESHOLD_VIB_RMS_ALERT_G);
         
         packet.alerts.is_urgent = (packet.ml_inference.reconstruction_mse > THRESHOLD_ML_MSE) || 
                                   packet.alerts.temp_breach || 

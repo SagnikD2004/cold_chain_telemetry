@@ -18,7 +18,8 @@
 // --- Physical Alert & Quality Thresholds ---
 #define THRESHOLD_TEMP_MIN_C      2.0f      // Lower critical bound[cite: 1]
 #define THRESHOLD_TEMP_MAX_C      8.0f      // Upper critical bound[cite: 1]
-#define THRESHOLD_SHOCK_G         2.5f      // ST LIS3DH drop detection trigger[cite: 1]
+#define THRESHOLD_SHOCK_PEAK_G    2.0f   // Passed to configureShockInterrupt()
+#define THRESHOLD_VIB_RMS_ALERT_G 0.35f
 #define THRESHOLD_ML_MSE          0.045f    // TFLM Autoencoder reconstruction anomaly cutoff[cite: 1]
 
 // --- LittleFS Ring Buffer Configuration ---

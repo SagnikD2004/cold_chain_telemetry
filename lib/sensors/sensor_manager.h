@@ -11,7 +11,8 @@ public:
     
     void clearInterrupt();
     
-    bool readSensors(float &temp, float &hum, float &accel_x, float &accel_y, float &accel_z);
+    float readVibrationBurstRMS(int num_samples = 50);
+    bool readClimate(float &temp, float &hum);
 
 private:
     Adafruit_SHT4x sht4;

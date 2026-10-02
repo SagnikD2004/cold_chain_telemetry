@@ -11,10 +11,6 @@ float MathEngine::calculateDewPoint(float temp_c, float humidity_pct) {
     return (243.04f * alpha) / (17.625f - alpha);
 }
 
-float MathEngine::calculateVibrationRMS(float x_g, float y_g, float z_g) {
-    return sqrt((x_g * x_g + y_g * y_g + z_g * z_g) / 3.0f); 
-}
-
 float MathEngine::updateGradient(float current_temp_c, uint32_t current_time_ms) {
     if (last_temp == -999.0f) {
         last_temp = current_temp_c;
