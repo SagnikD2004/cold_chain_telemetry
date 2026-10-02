@@ -25,10 +25,10 @@ BLEBeacon bleBeacon;
 QueueHandle_t telemetryQueue;
 SemaphoreHandle_t wakeSemaphore;
 
-void IRAM_ATTR lis3dh_isr() {
+void IRAM_ATTR lis3dh_shock_isr() {
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
     xSemaphoreGiveFromISR(wakeSemaphore, &xHigherPriorityTaskWoken);
-    if (xHigherPriorityTaskWoken) {
+    if (xHigherPriorityTaskWoken == pdTRUE) {
         portYIELD_FROM_ISR();
     }
 }
@@ -51,9 +51,9 @@ void setup() {
 
     // 4. Pin & Interrupt Configuration
     pinMode(PIN_LIS3DH_INT, INPUT_PULLDOWN);
-    attachInterrupt(digitalPinToInterrupt(PIN_LIS3DH_INT), lis3dh_isr, RISING);
+    attachInterrupt(digitalPinToInterrupt(PIN_LIS3DH_INT), lis3dh_shock_isr, RISING);
     
-    sensorManager.configureShockInterrupt(THRESHOLD_SHOCK_G);
+    sensorManager.configureShockInterrupt(THRESHOLD_SHOCK_PEAK_G);
     sensorManager.clearInterrupt(); // Ensure latch is clean before enabling sleep
 
     // 5. Light Sleep GPIO Wakeup Routing

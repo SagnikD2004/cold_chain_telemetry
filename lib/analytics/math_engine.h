@@ -7,7 +7,6 @@ public:
     MathEngine();
     
     float calculateDewPoint(float temp_c, float humidity_pct);
-    float calculateVibrationRMS(float x_g, float y_g, float z_g);
     float updateGradient(float current_temp_c, uint32_t current_time_ms);
     float updateMKT(float current_temp_c);
 
