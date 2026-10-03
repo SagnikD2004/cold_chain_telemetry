@@ -63,6 +63,7 @@ void SensorManager::clearInterrupt() {
 }
 
 float SensorManager::readVibrationBurstRMS(int num_samples) {
+    if(num_samples<=0) return 0.0f;
     float sum_sq = 0.0f;
 
     for (int i = 0; i < num_samples; i++) {
@@ -78,7 +79,7 @@ float SensorManager::readVibrationBurstRMS(int num_samples) {
         
         sum_sq += (dyn_vib * dyn_vib);
         
-        delay(2); 
+        delayMicroseconds(1000); 
     }
 
     return sqrt(sum_sq / (float)num_samples);
