@@ -28,10 +28,12 @@ void core1_sensing_task(void *pvParameters) {
             continue; 
         }
 
+        uint32_t now_ms = millis();
+
         float rms = sensorManager.readVibrationBurstRMS(50);
         float dew = mathEngine.calculateDewPoint(temp, hum);
-        float grad = mathEngine.updateGradient(temp, millis());
-        float mkt = mathEngine.updateMKT(temp);
+        float grad = mathEngine.updateGradient(temp, now_ms);
+        float mkt = mathEngine.updateMKT(temp, now_ms);
 
         TelemetryPacket packet;
         strncpy(packet.node_id, DEVICE_NODE_ID, sizeof(packet.node_id));
