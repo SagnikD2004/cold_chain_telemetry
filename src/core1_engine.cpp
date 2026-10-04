@@ -52,7 +52,10 @@ void core1_sensing_task(void *pvParameters) {
         packet.alerts.temp_breach = (temp < THRESHOLD_TEMP_MIN_C || temp > THRESHOLD_TEMP_MAX_C);
         packet.alerts.shock_detected = shock_triggered || (rms > THRESHOLD_VIB_RMS_ALERT_G);
         
-        packet.alerts.is_urgent = (packet.ml_inference.reconstruction_mse > THRESHOLD_ML_MSE) || 
+        // packet.alerts.is_urgent = (packet.ml_inference.reconstruction_mse > THRESHOLD_ML_MSE) || 
+        //                           packet.alerts.temp_breach || 
+        //                           packet.alerts.shock_detected;
+        packet.alerts.is_urgent = packet.ml_inference.anomaly_flag || 
                                   packet.alerts.temp_breach || 
                                   packet.alerts.shock_detected;
 

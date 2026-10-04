@@ -1,4 +1,5 @@
 #pragma once
+
 #include <Adafruit_SHT4x.h>
 #include <Adafruit_LIS3DH.h>
 #include <Wire.h>
@@ -12,6 +13,7 @@ public:
     void clearInterrupt();
     
     float readVibrationBurstRMS(int num_samples = 50);
+    
     bool readClimate(float &temp, float &hum);
 
 private:

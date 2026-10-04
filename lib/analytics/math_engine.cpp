@@ -35,8 +35,9 @@ float MathEngine::updateGradient(float current_temp_c, uint32_t current_time_ms)
         return 0.0f; // Ignore high-frequency bounce / jitter
     }
 
-    float dt_min = (float)dt_ms / 60000.0f;
-    float gradient = (current_temp_c - last_temp) / dt_min;
+    // float dt_min = (float)dt_ms / 60000.0f;
+    float dt_seconds = (float)dt_ms / 1000.0f;
+    float gradient = (current_temp_c - last_temp) / dt_seconds;
 
     last_temp = current_temp_c;
     last_time_ms = current_time_ms;
