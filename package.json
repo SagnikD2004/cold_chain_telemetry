@@ -1,0 +1,20 @@
+{
+  "name": "cargoshield",
+  "version": "1.0.0",
+  "private": true,
+  "description": "IoT-Based Intelligent Cold Chain Monitoring and Anomaly Detection System",
+  "scripts": {
+    "setup": "npm install && npm --prefix server install && npm --prefix client install",
+    "dev": "concurrently -k -n SERVER,CLIENT -c blue,green \"npm run server\" \"npm run client\"",
+    "server": "npm --prefix server run dev",
+    "client": "npm --prefix client run dev",
+    "start": "npm --prefix server start",
+    "build": "npm --prefix client run build",
+    "preview": "npm --prefix client run preview",
+    "lint": "npm --prefix client run lint",
+    "simulator": "cd server && node scripts/simulateTelemetry.js"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}
