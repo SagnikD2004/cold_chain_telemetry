@@ -20,15 +20,9 @@ MathEngine mathEngine;
 AnomalyDetector mlEngine;
 StorageManager storageManager;
 
-// ============================================================
-// UNITY TEST HOOKS
-// ============================================================
 void setUp(void) {}
 void tearDown(void) {}
 
-// ============================================================
-// MAIN TEST CASE
-// ============================================================
 void test_poll_infer_store_and_verify(void)
 {
     // 1. Initialize Storage & Erase Old Data
@@ -72,9 +66,9 @@ void test_poll_infer_store_and_verify(void)
         {
             alert_bitmask |= (1 << 0); // Bit 0: ML Anomaly detected
         }
-        if (temp > 8.0f || temp < 2.0f)
+        if (temp > THRESHOLD_TEMP_MAX_C || temp < THRESHOLD_TEMP_MIN_C)
         {
-            alert_bitmask |= (1 << 1); // Bit 1: Out of standard 2C-8C range
+            alert_bitmask |= (1 << 1);
         }
 
         // Populate struct matching the schema
@@ -99,11 +93,9 @@ void test_poll_infer_store_and_verify(void)
 
     Serial.println("\n--- VERIFYING STORED DATA FROM LITTLEFS ---");
 
-    // 4. Retrieve Data
     CompactLogRecord read_buffer[SAMPLE_COUNT];
     size_t retrieved_count = 0;
 
-    // We explicitly cast the buffer pointer to the type your storage manager expects
     TEST_ASSERT_TRUE_MESSAGE(storageManager.readBatch((struct CompactLogRecord *)read_buffer, SAMPLE_COUNT, retrieved_count), "Read batch failed");
     TEST_ASSERT_EQUAL_INT_MESSAGE(SAMPLE_COUNT, retrieved_count, "Did not retrieve exactly 20 records");
 
@@ -115,7 +107,6 @@ void test_poll_infer_store_and_verify(void)
     doc["record_count"] = retrieved_count;
     JsonArray recordsArray = doc["records"].to<JsonArray>();
 
-    // 6. Output Hex & Build JSON Payload
     for (size_t i = 0; i < retrieved_count; i++)
     {
         Serial.printf("\n[Record %d]\n", i + 1);
@@ -135,7 +126,6 @@ void test_poll_infer_store_and_verify(void)
         }
         Serial.println();
 
-        // Add to JSON Array
         JsonObject recordObj = recordsArray.add<JsonObject>();
         recordObj["timestamp"] = read_buffer[i].timestamp;
         recordObj["temperature"] = serialized(String(read_buffer[i].temperature, 2));
@@ -151,9 +141,6 @@ void test_poll_infer_store_and_verify(void)
     Serial.println(outputJson);
 }
 
-// ============================================================
-// MAIN ROUTINES
-// ============================================================
 void setup()
 {
     Serial.begin(115200);

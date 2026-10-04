@@ -20,7 +20,7 @@
 #define THRESHOLD_TEMP_MAX_C      36.0f      // Upper critical bound[cite: 1]
 #define THRESHOLD_SHOCK_PEAK_G    3.0f   // Passed to configureShockInterrupt()
 // #define THRESHOLD_VIB_RMS_ALERT_G 0.35f
-#define THRESHOLD_VIB_RMS_ALERT_G 0.20f
+#define THRESHOLD_VIB_RMS_ALERT_G 0.30f
 #define THRESHOLD_ML_MSE          0.0005f    // TFLM Autoencoder reconstruction anomaly cutoff[cite: 1]
 
 // --- LittleFS Ring Buffer Configuration ---
