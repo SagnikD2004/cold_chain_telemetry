@@ -17,6 +17,8 @@ server/.env
 # ==========================================
 # Backend / Server (Python / Node.js)
 # ==========================================
+**/node_modules/
+node_modules/
 server/node_modules/
 server/npm-debug.log*
 server/yarn-error.log*
@@ -27,6 +29,9 @@ __pycache__/
 venv/
 env/
 .pytest_cache/
+dist/
+build/
+.cache/
 
 # ==========================================
 # Database (SQLite in WAL Mode)
