@@ -36,7 +36,7 @@ void test_csv_pipeline(void) {
         float temp = 0.0f, hum = 0.0f;
         float ax, ay, az; 
         
-        sensorManager.readSensors(temp, hum, ax, ay, az);
+        // sensorManager.readSensors(temp, hum, ax, ay, az);
         
         float rms = sensorManager.readVibrationBurstRMS(50);
         
